@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://devops-serge.com/categories/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/tags/kubernetes/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/categories/kubernetes/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/posts/install_kubernetes_dashboard/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/posts/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/search/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/tags/</loc>
+  </url>
+</urlset>
