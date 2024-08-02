@@ -8,6 +8,13 @@
     <language>en-us</language>
     <atom:link href="https://devops-serge.com/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Install Argo CD with Helm on Kubernetes: add repo and application</title>
+      <link>https://devops-serge.com/posts/install_argo_cd/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://devops-serge.com/posts/install_argo_cd/</guid>
+      <description>I will guide you through installing Argo CD on Kubernetes using Helm. You&amp;#39;ll learn how to install Argo CD and set up your first application. This tutorial is perfect for DevOps engineers and developers looking to streamline their GitOps workflow.</description>
+    </item>
+    <item>
       <title>Kubernetes Dashboard: How to Install it Using Helm and Access</title>
       <link>https://devops-serge.com/posts/install_kubernetes_dashboard/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

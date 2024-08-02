@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Install Argo CD with Helm on Kubernetes: add repo and application | Learn DevOps with Serge</title>
+<meta name="keywords" content="Kubernetes, GitOps">
+<meta name="description" content="I will guide you through installing Argo CD on Kubernetes using Helm. You&#39;ll learn how to install Argo CD and set up your first application. This tutorial is perfect for DevOps engineers and developers looking to streamline their GitOps workflow.">
+<meta name="author" content="">
+<link rel="canonical" href="https://devops-serge.com/posts/install_argo_cd/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.fc220c15db4aef0318bbf30adc45d33d4d7c88deff3238b23eb255afdc472ca6.css" integrity="sha256-/CIMFdtK7wMYu/MK3EXTPU18iN7/MjiyPrJVr9xHLKY=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://devops-serge.com/favicon/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://devops-serge.com/favicon/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://devops-serge.com/favicon/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://devops-serge.com/favicon/apple-touch-icon.png">
+<link rel="mask-icon" href="https://devops-serge.com/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://devops-serge.com/posts/install_argo_cd/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+  
+
+<meta property="og:title" content="Install Argo CD with Helm on Kubernetes: add repo and application" />
+<meta property="og:description" content="I will guide you through installing Argo CD on Kubernetes using Helm. You&#39;ll learn how to install Argo CD and set up your first application. This tutorial is perfect for DevOps engineers and developers looking to streamline their GitOps workflow." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://devops-serge.com/posts/install_argo_cd/" /><meta property="article:section" content="posts" />
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Install Argo CD with Helm on Kubernetes: add repo and application"/>
+<meta name="twitter:description" content="I will guide you through installing Argo CD on Kubernetes using Helm. You&#39;ll learn how to install Argo CD and set up your first application. This tutorial is perfect for DevOps engineers and developers looking to streamline their GitOps workflow."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://devops-serge.com/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Install Argo CD with Helm on Kubernetes: add repo and application",
+      "item": "https://devops-serge.com/posts/install_argo_cd/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Install Argo CD with Helm on Kubernetes: add repo and application",
+  "name": "Install Argo CD with Helm on Kubernetes: add repo and application",
+  "description": "I will guide you through installing Argo CD on Kubernetes using Helm. You'll learn how to install Argo CD and set up your first application. This tutorial is perfect for DevOps engineers and developers looking to streamline their GitOps workflow.",
+  "keywords": [
+    "Kubernetes", "GitOps"
+  ],
+  "articleBody": "Hi, in this post I’m going to tell you how to install Argo CD and deploy a simple application stored in GitLab by ArgoCD. This post is based on the YouTube video: Argo CD is a GitOps tool for Kubernetes. In simple words, GitOps is an approach for deploying your applications and infrastructure when Git is a single place of truth.\nBefore starting an installation you need to fulfill the requirements: – Install kubectl – Prepare access to the Kubernetes cluster\nThere are two types of installation: multi-tenant and core.\nThe multi-tenant installation is the most common way to install Argo CD. This type of installation is typically used to service multiple application developer teams.\nThere are two types of multi-tenant installation: “Non High Availability” and “High Availability” or HA.\nFurthermore, each type is divided into standard installation and installation which requires only namespace-level privileges.\nThe Argo CD Core installation is primarily used to deploy Argo CD in headless mode. All details about this type can be found in the official documentation.\nLastly, you can install Argo CD using Helm or Kustomize.\nTo conclude I am going to use standard Arg CD installation in HA mode.\nLet’s get started on our journey. Open the manifest with the HA version.\nThen create the directory named “base” and the file “install.yaml” in it. Copy and paste the manifest into it.\nargocd └── base └── install.yaml After that create a “kustomization.yaml” file where set “install.yaml” in the resources section.\nargocd └── base ├── install.yaml └── kustomization.yaml $ cat ./base/kustomization.yaml apiVersion: kustomize.config.k8s.io/v1beta1 kind: Kustomization resources: - install.yaml In my case I have one environment named “test” so I will create the directory “overlays” with one directory “test”.\nargocd/ ├── ... └── overlays └── test Why so? I tell about this structure in my video about Kustomize. I recommend it for watching to understand this program clearly. In the directory “test” create a kustomization.yaml file and the directory named “files”.\nargocd/ ├── ... └── overlays └── test ├── files └── kustomization.yaml if you have installed the Ingress Nginx Controller you can put the Ingress manifest into the “files” directory.\ncat ./overlays/test/files/ingress.yaml apiVersion: networking.k8s.io/v1 kind: Ingress metadata: name: argo-cd-ui annotations: nginx.ingress.kubernetes.io/backend-protocol: \"HTTPS\" spec: ingressClassName: nginx rules: - host: argocd.company.com http: paths: - path: / pathType: Prefix backend: service: name: argocd-server port: name: https Note that the domain for my Argo CD is “argocd.company.com“.\nI added 1 annotation because I had redirect loops when connecting to the Argo CD web interface.\nannotations: nginx.ingress.kubernetes.io/backend-protocol: \"HTTPS\" It’s time to make customizations of the Argo CD manifest. Open your “kustomization.yaml” file.\nvi ./overlays/test/kustomization.yaml Firstly, paste standard strings with apiVersion and Kind.\napiVersion: kustomize.config.k8s.io/v1beta1 kind: Kustomization Then specify files in the resources section: “ingress.yaml” and base directory.\nresources: - ../../base/ - ./files/ingress.yaml Add namespace field.\nnamespace: argocd After that, add the secretGenerator section with three keys: –\tUsername –\tPassword –\tUrl\nsecretGenerator: - name: my-repo-secret literals: - username= - password= - url= Finally, add a patches section with one patch. This patch will set one label into the secret created by secretGenerator. Argo CD will use the credentials, configured in this secret, to access your GitLab.\npatches: - patch: |- apiVersion: v1 kind: Secret metadata: name: my-repo-secret labels: argocd.argoproj.io/secret-type: repo-creds Next, we need to make credentials for authenticating in the GitLab Repository. First, Create a group where the project will be stored.\nThen, create a blank project and put it into the created group. After, Create an Access Token for ArgoCD. Copy and paste your token in the key “password“ in secretGenerator. In the key “URL” paste the URL of your group. In the key “username” put the name of your token. In my case it is “argocd”.\nsecretGenerator: - name: my-repo-secret literals: - username=argocd - password=xxxxxxxx - url=https://gitlab.devops-serge.com/mygroup We are ready to install Argo CD. Open your terminal.\nCreate the namespace “argocd” and then Install Argo CD using the command kubectl apply with the K option.\ncd overlays/test kubectl create ns argocd Kubectl apply –k ./ Check a status of the pods.\nkubectl -n argocd get pod Let’s go into the web user interface. Add domain argocd.company.com to the /etc/hosts file. If you are not familiar with Ingress, watch my video about MetalLB and Ingress Nginx Controller. Alternatively, if you don’t have installed Ingress Nginx Controller you can connect to the Argo CD web interface using the kubectl port-forward command.\nkubectl port-forward service/argocd-server 9000:443 -n argocd The admin password is stored in the secret argocd-initial-admin-secret in the key: password. Retrieve it and log in. As you know, secrets are stored in based64 format so we need to decode it.\nkubectl -n argocd get secret argocd-initial-admin-secret -o yaml | grep password echo | base64 -d Let’s log in to Argo CD. In Settings → Repositories, you can find one template created by our secretGenerator. We are ready to deploy an application. I’ve prepared a simple helm chart before. How to do your helm charts you can find in one of my videos. My helm chart consists of a configmap, deployment, and ingress.\n.helm/ ├── Chart.yaml ├── templates │ ├── 0-configmap.yaml │ ├── 1-deployment.yaml │ └── 2-ingress.yaml └── values.yaml The configmap contains the index.html page. Depending on the environment (test, production, or something else), the text color will be different.\ncat .helm/templates/0-configmap.yaml --- apiVersion: v1 kind: ConfigMap metadata: name: index-html data: index.html: | Hello world! The deployment contains an nginx image for a container to which the configmap will be attached.\ncat .helm/templates/1-deployment.yaml apiVersion: apps/v1 kind: Deployment metadata: name: {{ .Chart.Name }} spec: selector: matchLabels: app: {{ .Chart.Name }} template: metadata: labels: app: {{ .Chart.Name }} annotations: checksum/config: \u003e- {{ include (print $.Template.BasePath \"/0-configmap.yaml\") . | sha256sum }} spec: containers: - name: {{ .Chart.Name }} image: nginx:alpine3.19 volumeMounts: - name: index-html-volume mountPath: /usr/share/nginx/html/index.html subPath: index.html ports: - containerPort: 80 volumes: - name: index-html-volume configMap: name: index-html Of course, there is a service for the deployment too.\n--- apiVersion: v1 kind: Service metadata: name: {{ .Chart.Name }} spec: selector: app: {{ .Chart.Name }} ports: - name: http port: 80 targetPort: 80 protocol: TCP Host in the ingress depends on the environment Values.env too.\n--- apiVersion: networking.k8s.io/v1 kind: Ingress metadata: name: {{ .Chart.Name }} spec: ingressClassName: nginx rules: - host: {{ pluck .Values.env .Values.domain | first | default .Values.domain._default }} http: paths: - path: / pathType: Prefix backend: service: name: {{ .Chart.Name }} port: number: 80 If the helm chart is deployed in the test environment the domain will be my-program-test.company.com\ncat .helm/values.yaml Below you can see the color of the text that will be used in the “test” environment.\ndomain: test: my-program-test.company.com color: test: green You can download this helm chart from my git repository.\nPut the helm chart into the created project in GitLab. The helm chart is uploaded. The next step is to configure Argo CD for monitoring this repository and deploy the helm chart to the cluster. To do it in ArgoCD there is an object called Application.\nOn the screen, you can see an example of the Application. In my case, I want to deploy an application that will synchronize other applications stored in the test-apps directory. I’ve prepared this application before.\ncat \u003c\u003c EOF | tee 1\u003e /dev/null argocd-app/argocd-test.yaml apiVersion: argoproj.io/v1alpha1 kind: Application metadata: name: argocd-test namespace: argocd spec: project: default source: repoURL: '' path: test-apps targetRevision: main destination: server: 'https://kubernetes.default.svc' namespace: argocd syncPolicy: automated: selfHeal: true Let’s create a repository for these apps. Then push the application to the repository. Use the “Push an existing folder” section. Open the repository and copy the link from the Clone with HTTPS section. Paste it in the repoURL field.\napiVersion: argoproj.io/v1alpha1 kind: Application metadata: name: argocd-test namespace: argocd spec: source: repoURL: 'https://gitlab.devops-serge.com/mygroup/argocd-app.git' Push your changes to the repository.\nAfter that apply the manifest with the application using kubectl.\ncd argocd-app kubectl apply -f argocd-test.yaml Check the application in the ArgoCD user interface. There is an error. I have not created test-app path yet. Create the directory and push it into the remote repository. Then recheck the application.\nmkdir argocd-app/test-apps argocd-app/ └── test-apps Refresh the application. The application was synced. Everything looks good.\nFinally, deploy the helm chart using ArgoCD. To do it you need to create an application again. I’ve done it before. You can see it below.\ncat \u003c\u003c EOF | tee 1\u003e /dev/null argocd-app/test-apps/my-program.yaml apiVersion: argoproj.io/v1alpha1 kind: Application metadata: name: my-program-test namespace: argocd spec: project: default source: targetRevision: main repoURL: 'https://gitlab.devops-serge.com/mygroup/myproject.git' path: .helm helm: releaseName: my-program-test valueFiles: - values.yaml values: | env: test destination: server: 'https://kubernetes.default.svc' namespace: my-program-test syncPolicy: automated: selfHeal: true syncOptions: - CreateNamespace=true EOF Push the application to the remote repository.\ngit add . git commit -m 'add repoURL' git push You can see below that our main application deployed the my-program application in the cluster. Let’s look at the my-program application. Let’s look at the main page of my-program. I need to add the domain name in my /etc/hosts file again. You can see that everything works smoothly. That’s it. We’ve installed Argo CD and deployed the simple application. See you!\n",
+  "wordCount" : "1521",
+  "inLanguage": "en",
+  "datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "0001-01-01T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://devops-serge.com/posts/install_argo_cd/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Learn DevOps with Serge",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://devops-serge.com/favicon/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://devops-serge.com/" accesskey="h" title="Learn DevOps with Serge (Alt + H)">Learn DevOps with Serge</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://devops-serge.com/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://devops-serge.com/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://devops-serge.com/">Home</a>&nbsp;»&nbsp;<a href="https://devops-serge.com/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      How to Install Argo CD using Helm?
+    </h1>
+    <div class="post-meta">
+
+</div>
+  </header> 
+
+  <div class="post-content"><p>Hi, in this post I&rsquo;m going to tell you how to install Argo CD and deploy a simple application stored in GitLab by ArgoCD. This post is based on the YouTube video:
+
+
+    
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/NI7rPEN6bGA?autoplay=0&controls=1&end=0&loop=0&mute=0&start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"
+      ></iframe>
+    </div>
+</p>
+<p>Argo CD is a GitOps tool for Kubernetes. In simple words, GitOps is an approach for deploying your applications and infrastructure when Git is a single place of truth.</p>
+<p>Before starting an installation you need to fulfill the requirements:
+– Install kubectl
+– Prepare access to the Kubernetes cluster</p>
+<p>There are two types of installation: <strong>multi-tenant</strong> and <strong>core</strong>.</p>
+<p>The <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#multi-tenant">multi-tenant</a> installation is the most common way to install Argo CD. This type of installation is typically used to service multiple application developer teams.</p>
+<blockquote>
+<p>There are two types of multi-tenant installation: &ldquo;Non High Availability&rdquo; and &ldquo;High Availability&rdquo; or HA.</p>
+</blockquote>
+<p>Furthermore, each type is divided into standard installation and installation which requires only namespace-level privileges.</p>
+<p>The Argo CD <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#core">Core</a> installation is primarily used to deploy Argo CD in headless mode. All details about this type can be found in the official documentation.</p>
+<p>Lastly, you can install Argo CD using Helm or Kustomize.</p>
+<p>To conclude I am going to use standard Arg CD installation in HA mode.</p>
+<p>Let’s get started on our journey. Open the <a href="https://github.com/argoproj/argo-cd/blob/master/manifests/ha/install.yaml">manifest</a> with the HA version.</p>
+<p>Then create the directory named &ldquo;base&rdquo; and the file “install.yaml” in it. Copy and paste the manifest into it.</p>
+<pre tabindex="0"><code>argocd
+└── base
+    └── install.yaml
+</code></pre><p>After that create a &ldquo;kustomization.yaml&rdquo; file where set &ldquo;install.yaml&rdquo; in the resources section.</p>
+<pre tabindex="0"><code>argocd
+└── base
+    ├── install.yaml
+    └── kustomization.yaml
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ cat ./base/kustomization.yaml 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: kustomize.config.k8s.io/v1beta1
+</span></span><span style="display:flex;"><span>kind: Kustomization
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>resources:
+</span></span><span style="display:flex;"><span>- install.yaml
+</span></span></code></pre></div><p>In my case I have one environment named “test” so I will create the directory “overlays” with one directory “test”.</p>
+<pre tabindex="0"><code>argocd/
+├── ...
+└── overlays
+    └── test
+</code></pre><p>Why so? I tell about this structure in my video about Kustomize. I recommend it for watching to understand this program clearly.
+
+
+    
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/sbGtg0l5Ylo?autoplay=0&controls=1&end=0&loop=0&mute=0&start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"
+      ></iframe>
+    </div>
+</p>
+<p>In the directory “test”  create a kustomization.yaml file and the directory named “files”.</p>
+<pre tabindex="0"><code>argocd/
+├── ...
+└── overlays
+    └── test
+        ├── files
+        └── kustomization.yaml
+</code></pre><p>if you have installed the Ingress Nginx Controller you can put the Ingress manifest into the &ldquo;files&rdquo; directory.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat ./overlays/test/files/ingress.yaml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">networking.k8s.io/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Ingress</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">argo-cd-ui</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nginx.ingress.kubernetes.io/backend-protocol</span>: <span style="color:#e6db74">&#34;HTTPS&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ingressClassName</span>: <span style="color:#ae81ff">nginx</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">rules</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">host</span>: <span style="color:#ae81ff">argocd.company.com</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">http</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">paths</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">path</span>: <span style="color:#ae81ff">/</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">pathType</span>: <span style="color:#ae81ff">Prefix</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">backend</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">service</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">name</span>: <span style="color:#ae81ff">argocd-server</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">port</span>:
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">name</span>: <span style="color:#ae81ff">https</span>
+</span></span></code></pre></div><blockquote>
+<p>Note that the domain for my Argo CD is “argocd.company.com“.</p>
+</blockquote>
+<p>I added 1 annotation because I had redirect loops when connecting to the Argo CD web interface.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>  <span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">nginx.ingress.kubernetes.io/backend-protocol</span>: <span style="color:#e6db74">&#34;HTTPS&#34;</span>
+</span></span></code></pre></div><p>It’s time to make customizations of the Argo CD manifest. Open your &ldquo;kustomization.yaml&rdquo; file.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>vi ./overlays/test/kustomization.yaml
+</span></span></code></pre></div><p>Firstly, paste standard strings with apiVersion and Kind.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">kustomize.config.k8s.io/v1beta1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Kustomization</span>
+</span></span></code></pre></div><p>Then specify files in the resources section: “ingress.yaml” and base directory.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">resources</span>:
+</span></span><span style="display:flex;"><span>- <span style="color:#ae81ff">../../base/</span>
+</span></span><span style="display:flex;"><span>- <span style="color:#ae81ff">./files/ingress.yaml</span>
+</span></span></code></pre></div><p>Add namespace field.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">argocd</span>
+</span></span></code></pre></div><p>After that, add the secretGenerator section with three keys:
+–	Username
+–	Password
+–	Url</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">secretGenerator</span>:
+</span></span><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">my-repo-secret</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">literals</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">username=</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">password=</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">url=</span>
+</span></span></code></pre></div><p>Finally, add a patches section with one patch. This patch will set one label into the secret created by secretGenerator. Argo CD will use the credentials, configured in this secret, to access your GitLab.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">patches</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">patch</span>: |-<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      apiVersion: v1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      kind: Secret
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      metadata:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        name: my-repo-secret
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        labels:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">          argocd.argoproj.io/secret-type: repo-creds</span>      
+</span></span></code></pre></div><p>Next, we need to make credentials for authenticating in the GitLab Repository. First, Create a group where the project will be stored.</p>
+<p><img loading="lazy" src="/img/2_install_argo_cd/1.png" alt="Create Group in GitLab"  />
+
+<img loading="lazy" src="/img/2_install_argo_cd/2.png" alt="Create Group in GitLab 2"  />
+
+<img loading="lazy" src="/img/2_install_argo_cd/3.png" alt="Create Group in GitLab 3"  />
+</p>
+<p>Then, create a blank project and put it into the created group.
+<img loading="lazy" src="/img/2_install_argo_cd/4.png" alt="Create new project in GitLab"  />
+
+<img loading="lazy" src="/img/2_install_argo_cd/5.png" alt="Create new project in GitLab 2"  />
+
+<img loading="lazy" src="/img/2_install_argo_cd/6.png" alt="Create new project in GitLab 3"  />
+</p>
+<p>After, Create an Access Token for ArgoCD.
+<img loading="lazy" src="/img/2_install_argo_cd/7.png" alt="Create new access token"  />
+
+<img loading="lazy" src="/img/2_install_argo_cd/8.png" alt="Create new access token 2"  />
+
+<img loading="lazy" src="/img/2_install_argo_cd/9.png" alt="Create new access token 3"  />
+</p>
+<p>Copy and paste your token in the key “password“ in secretGenerator.
+<img loading="lazy" src="/img/2_install_argo_cd/10.png" alt="Copy the token"  />
+</p>
+<p>In the key “URL” paste the URL of your group. In the key “username” put the name of your token. In my case it is “argocd”.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">secretGenerator</span>:
+</span></span><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">my-repo-secret</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">literals</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">username=argocd</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">password=xxxxxxxx</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ae81ff">url=https://gitlab.devops-serge.com/mygroup</span>
+</span></span></code></pre></div><p>We are ready to install Argo CD. Open your terminal.</p>
+<p>Create the namespace &ldquo;argocd&rdquo; and then Install Argo CD using the command <code>kubectl apply</code>  with the <code>K</code> option.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cd overlays/test
+</span></span><span style="display:flex;"><span>kubectl create ns argocd
+</span></span><span style="display:flex;"><span>Kubectl apply –k ./
+</span></span></code></pre></div><p>Check a status of the pods.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl -n argocd get pod
+</span></span></code></pre></div><p><img loading="lazy" src="/img/2_install_argo_cd/11.png" alt="pods"  />
+</p>
+<p>Let’s go into the web user interface. Add domain <code>argocd.company.com</code> to the <code>/etc/hosts</code> file.
+<img loading="lazy" src="/img/2_install_argo_cd/12.png" alt="ingress"  />
+
+<img loading="lazy" src="/img/2_install_argo_cd/13.png" alt="/etc/hosts"  />
+</p>
+<p><img loading="lazy" src="/img/2_install_argo_cd/15.png" alt="argo cd main page"  />
+</p>
+<p>If you are not familiar with Ingress, watch my video about MetalLB and Ingress Nginx Controller.
+
+
+    
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/cO8TEEashIk?autoplay=0&controls=1&end=0&loop=0&mute=0&start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"
+      ></iframe>
+    </div>
+</p>
+<p>Alternatively, if you don’t have installed Ingress Nginx Controller you can connect to the Argo CD web interface using the <code>kubectl port-forward command</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl port-forward service/argocd-server 9000:443 -n argocd
+</span></span></code></pre></div><p><img loading="lazy" src="/img/2_install_argo_cd/14.png" alt="kubectl port-forward"  />
+</p>
+<p>The admin password is stored in the secret <code>argocd-initial-admin-secret</code> in the key: <code>password</code>. Retrieve it and log in. As you know, secrets are stored in based64 format so we need to decode it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>kubectl -n argocd get secret argocd-initial-admin-secret -o yaml | grep password
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>echo &lt;BASE64_PASSWORD&gt; | base64 -d
+</span></span></code></pre></div><p>Let’s log in to Argo CD.
+<img loading="lazy" src="/img/2_install_argo_cd/16.png" alt="log in argo cd"  />
+</p>
+<p>In <code>Settings</code> → <code>Repositories</code>, you can find one template created by our secretGenerator.
+<img loading="lazy" src="/img/2_install_argo_cd/17.png" alt="Argo CD Repositories"  />
+</p>
+<p>We are ready to deploy an application. I’ve prepared a simple helm chart before. How to do your helm charts you can find in one of my videos.
+
+
+    
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/i9EHF4QGVMQ?autoplay=0&controls=1&end=0&loop=0&mute=0&start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"
+      ></iframe>
+    </div>
+</p>
+<p>My helm chart consists of a <code>configmap</code>, <code>deployment</code>, and <code>ingress</code>.</p>
+<pre tabindex="0"><code>.helm/
+├── Chart.yaml
+├── templates
+│   ├── 0-configmap.yaml
+│   ├── 1-deployment.yaml
+│   └── 2-ingress.yaml
+└── values.yaml
+</code></pre><p>The configmap contains the <code>index.html</code> page. Depending on the environment (test, production, or something else), the text color will be different.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat .helm/templates/0-configmap.yaml 
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">ConfigMap</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">index-html</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">data</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">index.html</span>: |<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &lt;h1 style=&#39;color: {{ pluck .Values.env .Values.color | first | default .Values.color._default }};&#39;&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Hello world!
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &lt;/h1&gt;</span>    
+</span></span></code></pre></div><p>The deployment contains an nginx image for a container to which the configmap will be attached.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat .helm/templates/1-deployment.yaml
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">apps/v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Deployment</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: {{ <span style="color:#ae81ff">.Chart.Name }}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">matchLabels</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">app</span>: {{ <span style="color:#ae81ff">.Chart.Name }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">template</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">app</span>: {{ <span style="color:#ae81ff">.Chart.Name }}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">annotations</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">checksum/config</span>: &gt;-<span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">          {{ include (print $.Template.BasePath &#34;/0-configmap.yaml&#34;) . | sha256sum }}</span>          
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: {{ <span style="color:#ae81ff">.Chart.Name }}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">image</span>: <span style="color:#ae81ff">nginx:alpine3.19</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">volumeMounts</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">index-html-volume</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">mountPath</span>: <span style="color:#ae81ff">/usr/share/nginx/html/index.html</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">subPath</span>: <span style="color:#ae81ff">index.html</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>          - <span style="color:#f92672">containerPort</span>: <span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">index-html-volume</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">configMap</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">name</span>: <span style="color:#ae81ff">index-html</span>
+</span></span></code></pre></div><p>Of course, there is a service for the deployment too.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">v1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Service</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: {{ <span style="color:#ae81ff">.Chart.Name }}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">selector</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">app</span>: {{ <span style="color:#ae81ff">.Chart.Name }}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">http</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">port</span>: <span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetPort</span>: <span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+</span></span></code></pre></div><p>Host in the ingress depends on the environment <code>Values.env</code> too.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span>apiVersion: networking.k8s.io/v1
+</span></span><span style="display:flex;"><span>kind: Ingress
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: <span style="color:#f92672">{{</span> .Chart.Name <span style="color:#f92672">}}</span>
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  ingressClassName: nginx
+</span></span><span style="display:flex;"><span>  rules:
+</span></span><span style="display:flex;"><span>  - host: <span style="color:#f92672">{{</span> pluck .Values.env .Values.domain | first | default .Values.domain._default <span style="color:#f92672">}}</span>
+</span></span><span style="display:flex;"><span>    http:
+</span></span><span style="display:flex;"><span>      paths:
+</span></span><span style="display:flex;"><span>      - path: /
+</span></span><span style="display:flex;"><span>        pathType: Prefix
+</span></span><span style="display:flex;"><span>        backend:
+</span></span><span style="display:flex;"><span>          service:
+</span></span><span style="display:flex;"><span>            name: <span style="color:#f92672">{{</span> .Chart.Name <span style="color:#f92672">}}</span>
+</span></span><span style="display:flex;"><span>            port:
+</span></span><span style="display:flex;"><span>              number: <span style="color:#ae81ff">80</span>
+</span></span></code></pre></div><p>If the helm chart is deployed in the <strong>test</strong> environment the domain will be <code>my-program-test.company.com</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat .helm/values.yaml
+</span></span></code></pre></div><p>Below you can see the color of the text that will be used in the &ldquo;test&rdquo; environment.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">domain</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">test</span>: <span style="color:#ae81ff">my-program-test.company.com</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">color</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">test</span>: <span style="color:#ae81ff">green</span>
+</span></span></code></pre></div><p>You can download this helm chart from my <a href="https://github.com/devops-serge/install-argocd">git repository</a>.</p>
+<p>Put the helm chart into the created project in GitLab.
+<img loading="lazy" src="/img/2_install_argo_cd/18.png" alt="Push an existing folder"  />
+</p>
+<p>The helm chart is uploaded.
+<img loading="lazy" src="/img/2_install_argo_cd/29.png" alt="uploaded helm chart"  />
+</p>
+<p>The next step is to configure Argo CD for monitoring this repository and deploy the helm chart to the cluster. To do it in ArgoCD there is an object called Application.</p>
+<p>On the screen, you can see an example of the Application.
+<img loading="lazy" src="/img/2_install_argo_cd/20.png" alt="Argo CD Application"  />
+</p>
+<p>In my case, I want to deploy an application that will synchronize other applications stored in the  <code>test-apps</code> directory. I’ve prepared this application before.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ae81ff">cat &lt;&lt; EOF | tee 1&gt; /dev/null argocd-app/argocd-test.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">argoproj.io/v1alpha1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Application</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">argocd-test</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">argocd</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">project</span>: <span style="color:#ae81ff">default</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">source</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">repoURL</span>: <span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">path</span>: <span style="color:#ae81ff">test-apps</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">targetRevision</span>: <span style="color:#ae81ff">main</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">destination</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">server</span>: <span style="color:#e6db74">&#39;https://kubernetes.default.svc&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">argocd</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">syncPolicy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">automated</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">selfHeal</span>: <span style="color:#66d9ef">true</span>
+</span></span></code></pre></div><p>Let’s create a repository for these apps.
+<img loading="lazy" src="/img/2_install_argo_cd/21.png" alt="creating the repo for Argo CD apps"  />
+</p>
+<p>Then push the application to the repository. Use the “Push an existing folder” section.
+<img loading="lazy" src="/img/2_install_argo_cd/22.png" alt="the repo for Argo CD apps"  />
+</p>
+<p>Open the repository and copy the link from the <code>Clone with HTTPS</code> section. Paste it in the <code>repoURL</code> field.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">argoproj.io/v1alpha1</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Application</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">argocd-test</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">argocd</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">source</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">repoURL</span>: <span style="color:#e6db74">&#39;https://gitlab.devops-serge.com/mygroup/argocd-app.git&#39;</span>
+</span></span></code></pre></div><p><img loading="lazy" src="/img/2_install_argo_cd/23.png" alt="Clone with HTTPS"  />
+</p>
+<p>Push your changes to the repository.</p>
+<p>After that apply the manifest with the application using <code>kubectl</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cd argocd-app
+</span></span><span style="display:flex;"><span>kubectl apply -f argocd-test.yaml
+</span></span></code></pre></div><p>Check the application in the ArgoCD user interface.
+<img loading="lazy" src="/img/2_install_argo_cd/24.png" alt="Argo CD app"  />
+</p>
+<p>There is an error. I have not created <code>test-app</code> path yet.
+<img loading="lazy" src="/img/2_install_argo_cd/26.png" alt="Argo CD App Error"  />
+</p>
+<p>Create the directory and push it into the remote repository. Then recheck the application.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mkdir argocd-app/test-apps
+</span></span></code></pre></div><pre tabindex="0"><code>argocd-app/
+└── test-apps
+</code></pre><p>Refresh the application. The application was synced.
+<img loading="lazy" src="/img/2_install_argo_cd/27.png" alt="The application was synced "  />
+</p>
+<p>Everything looks good.</p>
+<p>Finally, deploy the helm chart using ArgoCD. To do it you need to create an application again. I’ve done it before. You can see it below.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cat <span style="color:#e6db74">&lt;&lt; EOF | tee 1&gt; /dev/null argocd-app/test-apps/my-program.yaml
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">apiVersion: argoproj.io/v1alpha1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">kind: Application
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">metadata:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  name: my-program-test
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  namespace: argocd
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">spec:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  project: default
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  source:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    targetRevision: main
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    repoURL: &#39;https://gitlab.devops-serge.com/mygroup/myproject.git&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    path: .helm
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    helm:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      releaseName: my-program-test
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      valueFiles:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - values.yaml
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      values: |
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        env: test
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  destination:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    server: &#39;https://kubernetes.default.svc&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    namespace: my-program-test
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  syncPolicy:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    automated:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      selfHeal: true
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    syncOptions:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - CreateNamespace=true
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span></code></pre></div><p>Push the application to the remote repository.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git add .
+</span></span><span style="display:flex;"><span>git commit -m <span style="color:#e6db74">&#39;add repoURL&#39;</span>
+</span></span><span style="display:flex;"><span>git push
+</span></span></code></pre></div><p>You can see below that our main application deployed the <code>my-program</code> application in the cluster.
+<img loading="lazy" src="/img/2_install_argo_cd/28.png" alt="main app deployed the my-program app"  />
+</p>
+<p>Let’s look at the <code>my-program</code> application.
+<img loading="lazy" src="/img/2_install_argo_cd/30.png" alt="my-program app"  />
+</p>
+<p>Let’s look at the main page of <code>my-program</code>. I need to add the domain name in my <code>/etc/hosts</code> file again.
+<img loading="lazy" src="/img/2_install_argo_cd/31.png" alt="ingress"  />
+
+<img loading="lazy" src="/img/2_install_argo_cd/32.png" alt="/etc/hosts"  />
+</p>
+<p>You can see that everything works smoothly.
+<img loading="lazy" src="/img/2_install_argo_cd/33.png" alt="the main page of my program"  />
+</p>
+<p>That’s it. We&rsquo;ve installed Argo CD and deployed the simple application. See you!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://devops-serge.com/tags/kubernetes/">Kubernetes</a></li>
+      <li><a href="https://devops-serge.com/tags/gitops/">GitOps</a></li>
+    </ul>
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Install Argo CD with Helm on Kubernetes: add repo and application on x"
+            href="https://x.com/intent/tweet/?text=Install%20Argo%20CD%20with%20Helm%20on%20Kubernetes%3a%20add%20repo%20and%20application&amp;url=https%3a%2f%2fdevops-serge.com%2fposts%2finstall_argo_cd%2f&amp;hashtags=Kubernetes%2cGitOps">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Install Argo CD with Helm on Kubernetes: add repo and application on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fdevops-serge.com%2fposts%2finstall_argo_cd%2f&amp;title=Install%20Argo%20CD%20with%20Helm%20on%20Kubernetes%3a%20add%20repo%20and%20application&amp;summary=Install%20Argo%20CD%20with%20Helm%20on%20Kubernetes%3a%20add%20repo%20and%20application&amp;source=https%3a%2f%2fdevops-serge.com%2fposts%2finstall_argo_cd%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Install Argo CD with Helm on Kubernetes: add repo and application on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fdevops-serge.com%2fposts%2finstall_argo_cd%2f&title=Install%20Argo%20CD%20with%20Helm%20on%20Kubernetes%3a%20add%20repo%20and%20application">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Install Argo CD with Helm on Kubernetes: add repo and application on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fdevops-serge.com%2fposts%2finstall_argo_cd%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Install Argo CD with Helm on Kubernetes: add repo and application on whatsapp"
+            href="https://api.whatsapp.com/send?text=Install%20Argo%20CD%20with%20Helm%20on%20Kubernetes%3a%20add%20repo%20and%20application%20-%20https%3a%2f%2fdevops-serge.com%2fposts%2finstall_argo_cd%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Install Argo CD with Helm on Kubernetes: add repo and application on telegram"
+            href="https://telegram.me/share/url?text=Install%20Argo%20CD%20with%20Helm%20on%20Kubernetes%3a%20add%20repo%20and%20application&amp;url=https%3a%2f%2fdevops-serge.com%2fposts%2finstall_argo_cd%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Install Argo CD with Helm on Kubernetes: add repo and application on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Install%20Argo%20CD%20with%20Helm%20on%20Kubernetes%3a%20add%20repo%20and%20application&u=https%3a%2f%2fdevops-serge.com%2fposts%2finstall_argo_cd%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://devops-serge.com/">Learn DevOps with Serge</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

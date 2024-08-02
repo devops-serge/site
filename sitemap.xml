@@ -4,9 +4,11 @@
   <url>
     <loc>https://devops-serge.com/categories/</loc>
   </url><url>
-    <loc>https://devops-serge.com/tags/kubernetes/</loc>
+    <loc>https://devops-serge.com/tags/gitops/</loc>
   </url><url>
-    <loc>https://devops-serge.com/categories/kubernetes/</loc>
+    <loc>https://devops-serge.com/posts/install_argo_cd/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/tags/kubernetes/</loc>
   </url><url>
     <loc>https://devops-serge.com/posts/install_kubernetes_dashboard/</loc>
   </url><url>
