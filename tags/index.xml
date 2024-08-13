@@ -8,6 +8,13 @@
     <language>en-us</language>
     <atom:link href="https://devops-serge.com/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Alert Manager</title>
+      <link>https://devops-serge.com/tags/alert-manager/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://devops-serge.com/tags/alert-manager/</guid>
+      <description></description>
+    </item>
+    <item>
       <title>GitOps</title>
       <link>https://devops-serge.com/tags/gitops/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -15,10 +22,31 @@
       <description></description>
     </item>
     <item>
+      <title>Grafana</title>
+      <link>https://devops-serge.com/tags/grafana/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://devops-serge.com/tags/grafana/</guid>
+      <description></description>
+    </item>
+    <item>
       <title>Kubernetes</title>
       <link>https://devops-serge.com/tags/kubernetes/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://devops-serge.com/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Monitoring</title>
+      <link>https://devops-serge.com/tags/monitoring/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://devops-serge.com/tags/monitoring/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Prometheus</title>
+      <link>https://devops-serge.com/tags/prometheus/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://devops-serge.com/tags/prometheus/</guid>
       <description></description>
     </item>
   </channel>

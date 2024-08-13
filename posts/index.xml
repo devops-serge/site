@@ -15,6 +15,13 @@
       <description>I will guide you through installing Argo CD on Kubernetes using Helm. You&amp;#39;ll learn how to install Argo CD and set up your first application. This tutorial is perfect for DevOps engineers and developers looking to streamline their GitOps workflow.</description>
     </item>
     <item>
+      <title>Install Prometheus, Grafana, and Alert Manager on Kubernetes Cluster using Helm</title>
+      <link>https://devops-serge.com/posts/install_prometheus/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://devops-serge.com/posts/install_prometheus/</guid>
+      <description>Learn how to seamlessly install Prometheus, Alert Manager, and Grafana on Kubernetes using Helm. This guide walks you through the process of setting up these essential monitoring tools to enhance your cluster&amp;#39;s observability. By the end, you&amp;#39;ll have a powerful monitoring stack running smoothly on your Kubernetes cluster, ensuring you can easily track performance and respond to issues.</description>
+    </item>
+    <item>
       <title>Kubernetes Dashboard: How to Install it Using Helm and Access</title>
       <link>https://devops-serge.com/posts/install_kubernetes_dashboard/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

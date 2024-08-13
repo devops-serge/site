@@ -2,9 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://devops-serge.com/tags/alert-manager/</loc>
+  </url><url>
     <loc>https://devops-serge.com/tags/gitops/</loc>
   </url><url>
+    <loc>https://devops-serge.com/tags/grafana/</loc>
+  </url><url>
     <loc>https://devops-serge.com/posts/install_argo_cd/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/posts/install_prometheus/</loc>
   </url><url>
     <loc>https://devops-serge.com/tags/kubernetes/</loc>
   </url><url>
@@ -12,7 +18,11 @@
   </url><url>
     <loc>https://devops-serge.com/</loc>
   </url><url>
+    <loc>https://devops-serge.com/tags/monitoring/</loc>
+  </url><url>
     <loc>https://devops-serge.com/posts/</loc>
+  </url><url>
+    <loc>https://devops-serge.com/tags/prometheus/</loc>
   </url><url>
     <loc>https://devops-serge.com/search/</loc>
   </url><url>
